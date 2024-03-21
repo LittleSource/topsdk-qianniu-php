@@ -1,5 +1,5 @@
 {
-    "name": "topsdk/qianniu",
+    "name": "littleyuan/topsdk",
     "description": "topapi qianniu php sdk",
     "type": "library",
     "autoload": {
