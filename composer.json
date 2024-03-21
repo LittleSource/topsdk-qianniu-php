@@ -1,6 +1,6 @@
 {
-    "name": "topsdk/topapi",
-    "description": "topapi php sdk",
+    "name": "topsdk/qianniu",
+    "description": "topapi qianniu php sdk",
     "type": "library",
     "autoload": {
         "psr-4": {
