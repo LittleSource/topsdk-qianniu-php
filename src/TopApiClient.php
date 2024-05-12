@@ -2,7 +2,7 @@
 namespace Topsdk\Topapi;
 
 use Exception;
-use topsdk\topapi\TopUtil;
+use Topsdk\Topapi\TopUtil;
 
 class TopApiClient
 {
@@ -33,7 +33,8 @@ class TopApiClient
         return $this->appkey;
     }
 
-    public function __construct(string $appkey, string $secretKey, string $gatewayUrl,int $connectTimeout = 30000,int $readTimeout = 30000){
+    public function __construct(string $appkey, string $secretKey, string $gatewayUrl, int $connectTimeout = 30000, int $readTimeout = 30000)
+    {
         $this->appkey = $appkey;
         $this->secretKey = $secretKey;
         $this->gatewayUrl = $gatewayUrl;
@@ -53,38 +54,32 @@ class TopApiClient
         if ($this->connectTimeout) {
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
         }
-        curl_setopt ( $ch, CURLOPT_USERAGENT, "new_php_sdk" );
+        curl_setopt($ch, CURLOPT_USERAGENT, "new_php_sdk");
         //https 请求
-        if(strlen($url) > 5 && strtolower(substr($url,0,5)) == "https" ) {
+        if(strlen($url) > 5 && strtolower(substr($url, 0, 5)) == "https") {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->verifySsl);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->verifySsl);
         }
 
-        if (is_array($postFields) && 0 < count($postFields))
-        {
+        if (is_array($postFields) && 0 < count($postFields)) {
             $postBodyString = "";
-            foreach ($postFields as $k => $v)
-            {
+            foreach ($postFields as $k => $v) {
                 $postBodyString .= "$k=" . urlencode($v) . "&";
             }
             unset($k, $v);
             curl_setopt($ch, CURLOPT_POST, true);
             $header = array("content-type: application/x-www-form-urlencoded; charset=UTF-8");
-            curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, substr($postBodyString,0,-1));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, substr($postBodyString, 0, -1));
         }
         $reponse = curl_exec($ch);
 
-        if (curl_errno($ch))
-        {
-            throw new Exception(curl_error($ch),0);
-        }
-        else
-        {
+        if (curl_errno($ch)) {
+            throw new Exception(curl_error($ch), 0);
+        } else {
             $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if (200 !== $httpStatusCode)
-            {
-                throw new Exception($reponse,$httpStatusCode);
+            if (200 !== $httpStatusCode) {
+                throw new Exception($reponse, $httpStatusCode);
             }
         }
         curl_close($ch);
@@ -102,9 +97,9 @@ class TopApiClient
         if ($this->connectTimeout) {
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connectTimeout);
         }
-        curl_setopt ( $ch, CURLOPT_USERAGENT, "top-sdk-php" );
+        curl_setopt($ch, CURLOPT_USERAGENT, "top-sdk-php");
         //https 请求
-        if(strlen($url) > 5 && strtolower(substr($url,0,5)) == "https" ) {
+        if(strlen($url) > 5 && strtolower(substr($url, 0, 5)) == "https") {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
@@ -112,7 +107,7 @@ class TopApiClient
         $delimiter = '-------------' . uniqid();
         //先将post的普通数据生成主体字符串
         $data = '';
-        if($postFields != null){
+        if($postFields != null) {
             foreach ($postFields as $name => $content) {
                 $data .= "--" . $delimiter . "\r\n";
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"';
@@ -123,7 +118,7 @@ class TopApiClient
         }
 
         //将上传的文件生成主体字符串
-        if($fileFields != null){
+        if($fileFields != null) {
             foreach ($fileFields as $name => $file) {
                 $data .= "--" . $delimiter . "\r\n";
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"; filename="' . "topfile" . "\" \r\n";
@@ -137,7 +132,10 @@ class TopApiClient
         $data .= "--" . $delimiter . "--";
 
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER , array(
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            array(
                 'Content-Type: multipart/form-data; boundary=' . $delimiter,
                 'Content-Length: ' . strlen($data))
         );
@@ -146,16 +144,12 @@ class TopApiClient
         $reponse = curl_exec($ch);
         unset($data);
 
-        if (curl_errno($ch))
-        {
-            throw new Exception(curl_error($ch),0);
-        }
-        else
-        {
+        if (curl_errno($ch)) {
+            throw new Exception(curl_error($ch), 0);
+        } else {
             $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if (200 !== $httpStatusCode)
-            {
-                throw new Exception($reponse,$httpStatusCode);
+            if (200 !== $httpStatusCode) {
+                throw new Exception($reponse, $httpStatusCode);
             }
         }
         curl_close($ch);
@@ -177,16 +171,18 @@ class TopApiClient
             $this->sdkVersion,
             $requestUrl,
             $errorCode,
-            str_replace("\n","",$responseTxt)
+            str_replace("\n", "", $responseTxt)
         );
         $logger->log($logData);
     }
 
-    public function execute(string $apiCode, array $paramMap, array $fileParamMap) {
-        return $this->executeWithSession($apiCode,$paramMap,$fileParamMap,"");
+    public function execute(string $apiCode, array $paramMap, array $fileParamMap)
+    {
+        return $this->executeWithSession($apiCode, $paramMap, $fileParamMap, "");
     }
 
-    public function executeWithSession(string $apiCode, array $paramMap, array $fileParamMap, string $session) {
+    public function executeWithSession(string $apiCode, array $paramMap, array $fileParamMap, string $session)
+    {
         $sysParams = array();
         //组装系统参数
         $sysParams["app_key"] = $this->appkey;
@@ -197,75 +193,63 @@ class TopApiClient
         $sysParams["timestamp"] = date("Y-m-d H:i:s");
         $sysParams["simplify"] = $this->simplify;
         $sysParams["partner_id"] = $this->sdkVersion;
-		if (!empty($session))
-        {
+        if (!empty($session)) {
             $sysParams["session"] = $session;
         }
-		//获取业务参数
-		$apiParams = $paramMap;
+        //获取业务参数
+        $apiParams = $paramMap;
 
 
-		//签名
-		$sysParams["sign"] = TopUtil::generateSign(array_merge($apiParams, $sysParams),$this->secretKey);
+        //签名
+        $sysParams["sign"] = TopUtil::generateSign(array_merge($apiParams, $sysParams), $this->secretKey);
 
         $requestUrl = $this->gatewayUrl."?";
-		foreach ($sysParams as $sysParamKey => $sysParamValue)
-        {
+        foreach ($sysParams as $sysParamKey => $sysParamValue) {
             $requestUrl .= "$sysParamKey=" . urlencode($sysParamValue) . "&";
         }
         $requestUrl = substr($requestUrl, 0, -1);
 
-		//发起HTTP请求
+        //发起HTTP请求
         $result = new TopResult();
-		try
-        {
-            if(count($fileParamMap) > 0){
+        try {
+            if(count($fileParamMap) > 0) {
                 $resp = $this->curlWithMemoryFile($requestUrl, $paramMap, $fileParamMap);
-            }else{
+            } else {
                 $resp = $this->curl($requestUrl, $paramMap);
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $result->code = $e->getCode();
             $result->msg = $e->getMessage();
             return $result;
         }
 
-		unset($apiParams);
-		unset($fileParamMap);
-		//解析TOP返回结果
-		$respWellFormed = false;
-		if ("json" == $this->format)
-        {
+        unset($apiParams);
+        unset($fileParamMap);
+        //解析TOP返回结果
+        $respWellFormed = false;
+        if ("json" == $this->format) {
             $respObject = json_decode($resp);
-            if (null !== $respObject)
-            {
+            if (null !== $respObject) {
                 $respWellFormed = true;
-                foreach ($respObject as $propKey => $propValue)
-                {
+                foreach ($respObject as $propKey => $propValue) {
                     $respObject = $propValue;
                 }
             }
-        }
-        else if("xml" == $this->format)
-        {
+        } elseif("xml" == $this->format) {
             $respObject = @simplexml_load_string($resp);
-            if (false !== $respObject)
-            {
+            if (false !== $respObject) {
                 $respWellFormed = true;
             }
         }
 
-		//返回的HTTP文本不是标准JSON或者XML，记下错误日志
-		if (false === $respWellFormed)
-        {
+        //返回的HTTP文本不是标准JSON或者XML，记下错误日志
+        if (false === $respWellFormed) {
             $result->code = 0;
             $result->msg = "HTTP_RESPONSE_NOT_WELL_FORMED";
             return $result;
         }
 
-		return $respObject;
-	}
+        return $respObject;
+    }
 
 }
